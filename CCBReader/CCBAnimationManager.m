@@ -36,6 +36,12 @@
 @synthesize rootNode;
 @synthesize rootContainerSize;
 @synthesize delegate;
+@synthesize documentOutletNames;
+@synthesize documentOutletNodes;
+@synthesize documentCallbackNames;
+@synthesize documentCallbackNodes;
+@synthesize documentControllerName;
+@synthesize lastCompletedSequenceName;
 
 - (id) init
 {
@@ -45,6 +51,11 @@
     sequences = [[NSMutableArray alloc] init];
     nodeSequences = [[NSMutableDictionary alloc] init];
     baseValues = [[NSMutableDictionary alloc] init];
+    
+    documentOutletNames = [[NSMutableArray alloc] init];
+    documentOutletNodes = [[NSMutableArray alloc] init];
+    documentCallbackNames = [[NSMutableArray alloc] init];
+    documentCallbackNodes = [[NSMutableArray alloc] init];
     
     return self;
 }
@@ -448,7 +459,18 @@
 
 - (void) sequenceCompleted
 {
+    // Save last completed sequence
+    if (lastCompletedSequenceName != runningSequence.name)
+    {
+        [lastCompletedSequenceName release];
+        lastCompletedSequenceName = [runningSequence.name copy];
+    }
+    
+    // Callbacks
     [delegate completedAnimationSequenceNamed:runningSequence.name];
+    if (block) block(self);
+    
+    // Play next sequence
     int nextSeqId = runningSequence.chainedSequenceId;
     runningSequence = NULL;
     
@@ -462,6 +484,12 @@
 - (NSString*) runningSequenceName
 {
     return runningSequence.name;
+}
+
+-(void) setCompletedAnimationCallbackBlock:(void(^)(id sender))b
+{
+    [block release];
+    block = [b copy];
 }
 
 - (void) dealloc
@@ -483,6 +511,17 @@
     [nodeSequences release];
     self.rootNode = NULL;
     self.delegate = NULL;
+    self.documentControllerName = NULL;
+    
+    [documentOutletNames release];
+    [documentOutletNodes release];
+    [documentCallbackNames release];
+    [documentCallbackNodes release];
+    
+    [lastCompletedSequenceName release];
+    
+    [block release];
+    
     [super dealloc];
 }
 
@@ -567,8 +606,8 @@
 
 @end
 
-@implementation CCEaseInstant
 
+@implementation CCEaseInstant
 -(void) update: (ccTime) t
 {
     if (t < 0)
@@ -581,3 +620,4 @@
     }
 }
 @end
+
