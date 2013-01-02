@@ -296,19 +296,19 @@
                                                              fragmentShaderFilename:@"CCControlSwitchMask.fsh"];
         CHECK_GL_ERROR_DEBUG();
         
-        [shaderProgram_ addAttribute:kCCAttributeNamePosition   index:kCCVertexAttrib_Position];
-        [shaderProgram_ addAttribute:kCCAttributeNameColor      index:kCCVertexAttrib_Color];
-        [shaderProgram_ addAttribute:kCCAttributeNameTexCoord   index:kCCVertexAttrib_TexCoords];
+        [self.shaderProgram addAttribute:kCCAttributeNamePosition   index:kCCVertexAttrib_Position];
+        [self.shaderProgram addAttribute:kCCAttributeNameColor      index:kCCVertexAttrib_Color];
+        [self.shaderProgram addAttribute:kCCAttributeNameTexCoord   index:kCCVertexAttrib_TexCoords];
         CHECK_GL_ERROR_DEBUG();
         
-        [shaderProgram_ link];
+        [self.shaderProgram link];
         CHECK_GL_ERROR_DEBUG();
         
-        [shaderProgram_ updateUniforms];
+        [self.shaderProgram updateUniforms];
         CHECK_GL_ERROR_DEBUG();                
         
-        self.textureLocation    = glGetUniformLocation( shaderProgram_->program_, "u_texture");
-        self.maskLocation       = glGetUniformLocation( shaderProgram_->program_, "u_mask");
+        self.textureLocation    = glGetUniformLocation( self.shaderProgram->program_, "u_texture");
+        self.maskLocation       = glGetUniformLocation( self.shaderProgram->program_, "u_mask");
         CHECK_GL_ERROR_DEBUG();
         
         self.contentSize        = [maskTexture_ contentSize];
@@ -324,18 +324,18 @@
     
     ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
     ccGLBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    [shaderProgram_ setUniformForModelViewProjectionMatrix];
+    [self.shaderProgram setUniformsForBuiltins];
     
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture( GL_TEXTURE_2D, [texture_ name] );
+    glBindTexture( GL_TEXTURE_2D, self.texture.name );
     glUniform1i(textureLocation_, 0);
     
     glActiveTexture(GL_TEXTURE1);
     glBindTexture( GL_TEXTURE_2D, [maskTexture_ name] );
     glUniform1i(maskLocation_, 1);
     
-#define kQuadSize sizeof(quad_.bl)
-    long offset = (long)&quad_;
+#define kQuadSize sizeof(_quad.bl)
+    long offset = (long)&_quad;
     
     // vertex
     NSInteger diff = offsetof( ccV3F_C4B_T2F, vertices);
